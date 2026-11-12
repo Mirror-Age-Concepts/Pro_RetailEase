@@ -54,4 +54,15 @@ public class InMemoryTransactionStore : ITransactionStore
 
         return Task.FromResult<IReadOnlyList<Transaction>>(failedTransactions);
     }
+
+    public Task<IReadOnlyList<Transaction>> GetConflictsAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default)
+    {
+        var conflictedTransactions = _transactions.Values
+            .Where(transaction => transaction.StoreId == storeId
+                && transaction.TerminalId == terminalId
+                && transaction.Status == TransactionStatus.Conflict)
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<Transaction>>(conflictedTransactions);
+    }
 }

@@ -25,11 +25,20 @@ public class TransactionSynchronizer : ISynchronizationEngine
 
         var succeededCount = 0;
         var failedCount = 0;
+        var conflictsCount = 0;
         DateTime? lastCheckpointUtc = null;
 
         foreach (var transaction in pendingTransactions)
         {
             var cloudResult = await _cloudClient.SyncAsync(transaction, cancellationToken);
+
+            if (cloudResult.Conflict)
+            {
+                transaction.MarkConflict(cloudResult.ErrorMessage ?? "Cloud transaction synchronization conflict.");
+                await _store.SaveAsync(transaction, cancellationToken);
+                conflictsCount++;
+                continue;
+            }
 
             if (cloudResult.Succeeded)
             {
@@ -50,7 +59,8 @@ public class TransactionSynchronizer : ISynchronizationEngine
             ProcessedCount: pendingTransactions.Count,
             SucceededCount: succeededCount,
             FailedCount: failedCount,
-            LastCheckpointUtc: lastCheckpointUtc);
+            LastCheckpointUtc: lastCheckpointUtc,
+            ConflictsCount: conflictsCount);
     }
 
     public async Task<SyncResult> RetryFailedAsync(SynchronizationRequest request, CancellationToken cancellationToken = default)

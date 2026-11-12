@@ -16,5 +16,6 @@ public interface ICloudTransactionClient
 /// </summary>
 public record CloudTransactionSyncResult(
     bool Succeeded,
+    bool Conflict,
     string? ErrorCode = null,
     string? ErrorMessage = null);

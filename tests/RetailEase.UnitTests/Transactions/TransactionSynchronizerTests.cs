@@ -157,6 +157,71 @@ public class TransactionSynchronizerTests
         Assert.Equal(0, result.SucceededCount);
         Assert.Equal(0, result.FailedCount);
     }
+
+    [Fact]
+    public async Task SynchronizeAsync_MarksPendingTransactionConflictWhenCloudReportsConflict()
+    {
+        var store = new InMemoryTransactionStore();
+        var manager = new TransactionManager(store);
+        var storeId = Guid.NewGuid();
+        var terminalId = Guid.NewGuid();
+
+        var created = await manager.CreateAsync(new CreateTransactionRequest(
+            StoreId: storeId,
+            TerminalId: terminalId,
+            IdempotencyKey: "sync-005",
+            CustomerId: null,
+            Items: Array.Empty<TransactionItem>()));
+
+        await manager.SubmitAsync(created.Id);
+
+        var client = new FakeCloudTransactionClient(success: false, errorMessage: "duplicate-transaction", conflict: true);
+        var sut = new TransactionSynchronizer(store, client);
+
+        var result = await sut.SynchronizeAsync(new SynchronizationRequest(storeId, terminalId));
+
+        Assert.Equal(1, result.ProcessedCount);
+        Assert.Equal(0, result.SucceededCount);
+        Assert.Equal(0, result.FailedCount);
+        Assert.Equal(1, result.ConflictsCount);
+
+        var stored = await store.GetAsync(created.Id);
+        Assert.Equal(TransactionStatus.Conflict, stored!.Status);
+        Assert.Equal("duplicate-transaction", stored.LastError);
+    }
+
+    [Fact]
+    public async Task SynchronizeAsync_AfterConflictTransactionIsNotRetriedAutomatically()
+    {
+        var store = new InMemoryTransactionStore();
+        var manager = new TransactionManager(store);
+        var storeId = Guid.NewGuid();
+        var terminalId = Guid.NewGuid();
+
+        var created = await manager.CreateAsync(new CreateTransactionRequest(
+            StoreId: storeId,
+            TerminalId: terminalId,
+            IdempotencyKey: "sync-006",
+            CustomerId: null,
+            Items: Array.Empty<TransactionItem>()));
+
+        await manager.SubmitAsync(created.Id);
+
+        var client = new FakeCloudTransactionClient(success: false, errorMessage: "duplicate-transaction", conflict: true);
+        var sut = new TransactionSynchronizer(store, client);
+
+        var firstResult = await sut.SynchronizeAsync(new SynchronizationRequest(storeId, terminalId));
+        var secondResult = await sut.SynchronizeAsync(new SynchronizationRequest(storeId, terminalId));
+
+        Assert.Equal(1, firstResult.ProcessedCount);
+        Assert.Equal(1, firstResult.ConflictsCount);
+
+        Assert.Equal(0, secondResult.ProcessedCount);
+        Assert.Equal(0, secondResult.ConflictsCount);
+
+        var stored = await store.GetAsync(created.Id);
+        Assert.Equal(TransactionStatus.Conflict, stored!.Status);
+    }
 }
 
 /// <summary>
@@ -165,19 +230,22 @@ public class TransactionSynchronizerTests
 internal sealed class FakeCloudTransactionClient : ICloudTransactionClient
 {
     private readonly bool _success;
+    private readonly bool _conflict;
     private readonly string? _errorMessage;
 
-    public FakeCloudTransactionClient(bool success, string? errorMessage = null)
+    public FakeCloudTransactionClient(bool success, string? errorMessage = null, bool conflict = false)
     {
         _success = success;
+        _conflict = conflict;
         _errorMessage = errorMessage;
     }
 
     public Task<CloudTransactionSyncResult> SyncAsync(Transaction transaction, CancellationToken cancellationToken = default)
     {
         return Task.FromResult(new CloudTransactionSyncResult(
-            Succeeded: _success,
-            ErrorCode: _success ? null : "CloudUnavailable",
-            ErrorMessage: _success ? null : _errorMessage));
+            Succeeded: _success && !_conflict,
+            Conflict: _conflict,
+            ErrorCode: _conflict ? "Conflict" : _success ? null : "CloudUnavailable",
+            ErrorMessage: _conflict ? _errorMessage : (_success ? null : _errorMessage)));
     }
 }

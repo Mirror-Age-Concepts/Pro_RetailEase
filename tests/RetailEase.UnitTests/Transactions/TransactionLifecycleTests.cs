@@ -79,6 +79,35 @@ public class TransactionLifecycleTests
     }
 
     [Fact]
+    public void MarkConflict_TransitionsSubmittedToConflict()
+    {
+        var transaction = Transaction.Create(
+            storeId: Guid.NewGuid(),
+            terminalId: Guid.NewGuid(),
+            idempotencyKey: "txn-008");
+
+        transaction.Submit();
+        transaction.MarkConflict("duplicate-transaction");
+
+        Assert.Equal(TransactionStatus.Conflict, transaction.Status);
+        Assert.Equal("duplicate-transaction", transaction.LastError);
+    }
+
+    [Fact]
+    public void MarkSyncedFromConflict_Throws()
+    {
+        var transaction = Transaction.Create(
+            storeId: Guid.NewGuid(),
+            terminalId: Guid.NewGuid(),
+            idempotencyKey: "txn-009");
+
+        transaction.Submit();
+        transaction.MarkConflict("duplicate-transaction");
+
+        Assert.Throws<InvalidOperationException>(() => transaction.MarkSynced());
+    }
+
+    [Fact]
     public void InvalidTransitionFromSyncedToSubmitted_Throws()
     {
         var transaction = Transaction.Create(

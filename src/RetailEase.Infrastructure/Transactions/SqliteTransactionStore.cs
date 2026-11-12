@@ -55,4 +55,16 @@ public class SqliteTransactionStore : ITransactionStore
 
         return failedTransactions;
     }
+
+    public async Task<IReadOnlyList<Transaction>> GetConflictsAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default)
+    {
+        var conflictedTransactions = await _database.Transactions
+            .AsNoTracking()
+            .Where(transaction => transaction.StoreId == storeId
+                && transaction.TerminalId == terminalId
+                && transaction.Status == TransactionStatus.Conflict)
+            .ToListAsync(cancellationToken);
+
+        return conflictedTransactions;
+    }
 }

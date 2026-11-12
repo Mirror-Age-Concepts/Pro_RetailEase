@@ -16,4 +16,6 @@ public interface ITransactionStore
     Task<IReadOnlyList<Transaction>> GetPendingAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<Transaction>> GetFailedAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Transaction>> GetConflictsAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default);
 }

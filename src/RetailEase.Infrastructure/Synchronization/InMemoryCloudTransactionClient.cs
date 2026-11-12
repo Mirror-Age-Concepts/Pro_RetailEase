@@ -12,6 +12,6 @@ public class InMemoryCloudTransactionClient : ICloudTransactionClient
 {
     public Task<CloudTransactionSyncResult> SyncAsync(Transaction transaction, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(new CloudTransactionSyncResult(Succeeded: true));
+        return Task.FromResult(new CloudTransactionSyncResult(Succeeded: true, Conflict: false));
     }
 }

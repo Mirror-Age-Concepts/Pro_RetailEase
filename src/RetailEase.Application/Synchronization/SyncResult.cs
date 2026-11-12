@@ -7,4 +7,5 @@ public record SyncResult(
     int ProcessedCount,
     int SucceededCount,
     int FailedCount,
-    DateTime? LastCheckpointUtc);
+    DateTime? LastCheckpointUtc,
+    int ConflictsCount);

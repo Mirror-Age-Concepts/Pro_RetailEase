@@ -100,6 +100,19 @@ public class Transaction
         UpdatedAtUtc = DateTime.UtcNow;
     }
 
+    /// <summary>
+    /// Records a cloud-reported synchronization conflict (Submitted -> Conflict).
+    /// Conflicted transactions require manual reconciliation and are excluded from automatic retry.
+    /// </summary>
+    public void MarkConflict(string error)
+    {
+        EnsureTransition(TransactionStatus.Submitted, TransactionStatus.Conflict);
+
+        Status = TransactionStatus.Conflict;
+        LastError = error;
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
+
     /// <summary>Retries a failed synchronization (Failed -> Submitted).</summary>
     public void Retry()
     {

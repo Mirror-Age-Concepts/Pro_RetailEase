@@ -15,5 +15,8 @@ public enum TransactionStatus
     Synced = 2,
 
     /// <summary>Transaction synchronization failed; pending retry.</summary>
-    Failed = 3
+    Failed = 3,
+
+    /// <summary>Transaction synchronization conflicted with existing cloud data; pending manual reconciliation.</summary>
+    Conflict = 4
 }
