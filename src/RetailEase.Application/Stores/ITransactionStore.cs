@@ -12,4 +12,8 @@ public interface ITransactionStore
     Task SaveAsync(Transaction transaction, CancellationToken cancellationToken = default);
 
     Task<Transaction?> GetAsync(Guid transactionId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Transaction>> GetPendingAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Transaction>> GetFailedAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default);
 }

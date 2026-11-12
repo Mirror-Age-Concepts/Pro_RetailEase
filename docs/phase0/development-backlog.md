@@ -31,10 +31,12 @@
 
 ## Phase 2 — In-Store Transaction Engine
 
-- TM-001: Transaction aggregate and lifecycle states. **Delivered (slice).**
-- TM-002: Local transaction persistence (SQLite/local DB). In progress (in-memory store delivered; SQLite-backed pending).
-- TM-003: Offline queue and retry. In progress (lifecycle queue semantics delivered; queue persistence pending).
-- TM-004: Idempotent synchronization. In progress (idempotency key enforcement delivered via store).
+- TM-001: Transaction aggregate and lifecycle states. **Delivered.**
+- TM-002: Local transaction persistence (SQLite/local DB). **Delivered** (SQLite via EF Core Sqlite;
+  in-memory store for unit tests).
+- TM-003: Offline queue and retry. In progress (retry orchestration delivered; queue worker pending).
+- TM-004: Idempotent synchronization. In progress (idempotency enforcement + outbox sync engine delivered;
+  certified cloud client pending).
 - TM-005: Reconciliation and conflict handling. Pending.
 
 ## Phase 3 — Client Management and Interfaces

@@ -17,22 +17,25 @@
   - Authorization services registered in the API host.
   - Self health check unit tests in place.
   - Runtime verification: `GET /health` → HTTP 200 / `Healthy`.
-- Phase 2 — In-Store Transaction Engine (initial slice delivered):
+- Phase 2 — In-Store Transaction Engine (delivered slices):
   - Domain: `Transaction`, `TransactionItem`, `TransactionStatus` with strict lifecycle transitions.
   - Application: `ITransactionStore`, `ITransactionManager`, `TransactionManager`, create request.
-  - Infrastructure: `InMemoryTransactionStore` (local persistence stand-in; SQLite-backed store pending).
-  - Unit tests: transaction lifecycle + manager orchestration (13 unit tests green).
+  - Infrastructure: `InMemoryTransactionStore`, `SqliteTransactionStore`, `InMemoryCloudTransactionClient`.
+  - Synchronization: `ISynchronizationEngine`, `TransactionSynchronizer`, `ICloudTransactionClient`, `SyncResult`,
+    retry orchestration (`RetryFailedAsync`).
+  - Unit tests: transaction lifecycle, manager orchestration, synchronization, retry (19 unit tests green).
 
 ## Modules In Progress
 
 - Phase 0 requirements validation and open-question resolution.
 - Phase 1 authentication foundations completion; structured/file logging sinks.
-- Phase 2: SQLite-backed local transaction persistence; synchronization engine; reconciliation.
+- Phase 2: Offline retry orchestration delivered; certified cloud sync client completion (TM-004);
+  reconciliation and conflict handling (TM-005).
 
 ## Pending Modules
 
 - Phase 1: CI/CD execution, auth completion, logging sinks, DB migrations baseline.
-- Phase 2: Local SQLite transaction database, synchronization engine (queue/checkpoint/idempotency),
+- Phase 2: Offline queue persistence/processing; synchronization engine (queue/checkpoint/idempotency);
   reconciliation and conflict handling.
 - Phase 3 onward: clients, integrations, cloud, reporting, security, release.
 

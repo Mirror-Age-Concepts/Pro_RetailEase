@@ -32,4 +32,26 @@ public class InMemoryTransactionStore : ITransactionStore
     {
         return Task.FromResult(_transactions.TryGetValue(transactionId, out var transaction) ? transaction : null);
     }
+
+    public Task<IReadOnlyList<Transaction>> GetPendingAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default)
+    {
+        var pendingTransactions = _transactions.Values
+            .Where(transaction => transaction.StoreId == storeId
+                && transaction.TerminalId == terminalId
+                && transaction.Status == TransactionStatus.Submitted)
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<Transaction>>(pendingTransactions);
+    }
+
+    public Task<IReadOnlyList<Transaction>> GetFailedAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default)
+    {
+        var failedTransactions = _transactions.Values
+            .Where(transaction => transaction.StoreId == storeId
+                && transaction.TerminalId == terminalId
+                && transaction.Status == TransactionStatus.Failed)
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<Transaction>>(failedTransactions);
+    }
 }

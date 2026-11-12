@@ -19,12 +19,10 @@ public class SqliteTransactionStore : ITransactionStore
         _database = database;
     }
 
-    public Task SaveAsync(Transaction transaction, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(Transaction transaction, CancellationToken cancellationToken = default)
     {
         _database.Transactions.Add(transaction);
-        _database.SaveChanges(cancellationToken);
-
-        return Task.CompletedTask;
+        await _database.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<Transaction?> GetAsync(Guid transactionId, CancellationToken cancellationToken = default)
@@ -32,5 +30,29 @@ public class SqliteTransactionStore : ITransactionStore
         return await _database.Transactions
             .AsNoTracking()
             .FirstOrDefaultAsync(transaction => transaction.Id == transactionId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Transaction>> GetPendingAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default)
+    {
+        var pendingTransactions = await _database.Transactions
+            .AsNoTracking()
+            .Where(transaction => transaction.StoreId == storeId
+                && transaction.TerminalId == terminalId
+                && transaction.Status == TransactionStatus.Submitted)
+            .ToListAsync(cancellationToken);
+
+        return pendingTransactions;
+    }
+
+    public async Task<IReadOnlyList<Transaction>> GetFailedAsync(Guid storeId, Guid terminalId, CancellationToken cancellationToken = default)
+    {
+        var failedTransactions = await _database.Transactions
+            .AsNoTracking()
+            .Where(transaction => transaction.StoreId == storeId
+                && transaction.TerminalId == terminalId
+                && transaction.Status == TransactionStatus.Failed)
+            .ToListAsync(cancellationToken);
+
+        return failedTransactions;
     }
 }

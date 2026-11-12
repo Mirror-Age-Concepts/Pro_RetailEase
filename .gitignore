@@ -1,0 +1,16 @@
+## .NET build outputs
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio
+.vs/
+*.user
+
+## SQLite local databases
+*.db
+*.db-shm
+*.db-wal
+
+## Environment
+.env
+local.settings.json

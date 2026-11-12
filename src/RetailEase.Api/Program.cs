@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using RetailEase.Api.Health;
+using RetailEase.Api.Services;
+using RetailEase.Application.Synchronization;
 using RetailEase.Application.Stores;
 using RetailEase.Application.Transactions;
 using RetailEase.Infrastructure;
 using RetailEase.Infrastructure.Persistence;
+using RetailEase.Infrastructure.Synchronization;
 using RetailEase.Infrastructure.Transactions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +22,9 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<ITransactionStore, SqliteTransactionStore>();
 builder.Services.AddScoped<ITransactionManager, TransactionManager>();
+builder.Services.AddSingleton<ICloudTransactionClient, InMemoryCloudTransactionClient>();
+builder.Services.AddSingleton<ISynchronizationEngine, TransactionSynchronizer>();
+builder.Services.AddHostedService<TransactionSyncWorker>();
 
 builder.Services.AddHealthChecks()
     .AddCheck<SelfHealthCheck>("self", failureStatus: HealthStatus.Unhealthy, tags: new[] { "ready" });
