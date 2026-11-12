@@ -1,0 +1,766 @@
+# MASTER SOFTWARE DEVELOPMENT PROMPT
+## RETAILEASE – ENTERPRISE RETAIL MANAGEMENT PLATFORM
+### Based on NEXTEP Block Architecture | C# / .NET Ecosystem
+
+---
+
+## 1. ROLE AND ENGINEERING RESPONSIBILITY
+
+Act as a Principal Software Architect, Senior C# Engineer, Enterprise Application Developer, Database Architect, Cybersecurity Engineer, DevOps Engineer and Quality Assurance Lead.
+
+Your assignment is to design, engineer, implement, test and prepare **RetailEase**, a production-grade, enterprise retail transaction and management platform.
+
+The supplied document, `NEXTEP ARCHITECTURE DESIGN BREAKDOWN.pptm`, is the primary architectural reference.
+
+Use its architectural concepts and terminology as the foundation for RetailEase.
+
+Do not simply reproduce the presentation. Translate its architecture into a complete, maintainable, secure and scalable software system.
+
+### Product identity
+
+- Product name: RetailEase
+- Architectural reference: NEXTEP Architecture
+- Primary language: C#
+- Backend framework: ASP.NET Core
+- Runtime: .NET LTS
+- Database: Microsoft SQL Server
+- Local database: SQLite or SQL Server Express, subject to workload assessment
+- Cloud infrastructure: Microsoft Azure
+- Architecture: Distributed, modular, offline-capable enterprise platform
+- Deployment: Cloud and on-premises/in-store installations
+
+The software must be designed for real commercial retail operations.
+
+Do not deliver a demonstration-only application.
+
+---
+
+# 2. CORE ARCHITECTURAL REQUIREMENTS
+
+Implement two major architectural environments.
+
+## A. IN-STORE ARCHITECTURE
+
+This environment manages physical retail operations.
+
+Develop the following components.
+
+### A1. Transaction Manager (TM)
+
+The Transaction Manager is the central processing component of each retail installation.
+
+Responsibilities:
+
+1. Coordinate transactions across all connected client devices.
+2. Manage communication between POS terminals, kiosks, OMS and peripherals.
+3. Maintain local transaction storage and caching.
+4. Process transaction requests.
+5. Maintain transaction integrity.
+6. Record transaction events.
+7. Synchronize transactions with the cloud.
+8. Handle interrupted network connections.
+9. Retry failed synchronization operations.
+10. Prevent duplicate transaction processing.
+11. Receive and distribute software updates.
+12. Enforce device licensing and authorization.
+13. Monitor the operational health of connected clients.
+14. Maintain transaction audit trails.
+
+The Transaction Manager must remain operational during temporary internet outages.
+
+Implement a reliable local-first transaction processing mechanism.
+
+Transactions must be safely queued and synchronized when connectivity returns.
+
+Use unique transaction identifiers, idempotency keys and synchronization checkpoints.
+
+### A2. Client Manager
+
+Develop a standalone Client Manager executable for each supported device.
+
+Supported client types:
+
+- POS terminals.
+- Self-service kiosks.
+- Digital menu displays (DMD).
+- Order Management Systems (OMS).
+
+Responsibilities:
+
+1. Launch the appropriate client interface.
+2. Communicate with the local Transaction Manager.
+3. Receive configuration updates.
+4. Report client health.
+5. Receive authorized software updates.
+6. Handle disconnections gracefully.
+7. Maintain device identity and authorization.
+
+Each Client Manager must operate independently while receiving centralized configuration and software updates.
+
+### A3. Client User Interfaces
+
+Create separate user experiences for:
+
+**POS Interface**
+- Product selection.
+- Product search.
+- Barcode scanning.
+- Shopping cart.
+- Order processing.
+- Discounts.
+- Tax calculations.
+- Payment initiation.
+- Receipt printing.
+- Transaction history.
+- Returns and refunds subject to authorization.
+
+**Kiosk Interface**
+- Customer self-service.
+- Product browsing.
+- Menu selection.
+- Order placement.
+- Order confirmation.
+- Payment initiation.
+- Receipt or order-ticket generation.
+
+**Digital Menu Display**
+- Dynamic product presentation.
+- Pricing.
+- Promotional banners.
+- Product availability.
+- Images and multimedia.
+- Centralized content updates.
+
+**Order Management System**
+- Order reception.
+- Order status.
+- Order preparation.
+- Order assignment.
+- Order completion.
+- Order cancellation.
+- Kitchen or service workflow.
+
+Where practical, kiosk and DMD interfaces should run independently from their Client Manager process, following the reference architecture's separate NEXTEP.UX process concept.
+
+POS and OMS interfaces may run within their Client Manager process.
+
+### A4. Peripheral Integration
+
+Develop an extensible peripheral integration framework.
+
+Provide adapter interfaces for:
+
+1. Credit card terminals.
+2. Cash and change machines.
+3. Electronic weighing scales.
+4. Magnetic stripe readers.
+5. Barcode scanners.
+6. Receipt and document printers.
+7. KASA sensors.
+8. Biometric devices.
+9. Customer pagers.
+10. Reservation management devices.
+
+Support appropriate hardware communication mechanisms, including USB, serial ports, network protocols and vendor SDKs.
+
+Do not assume that all hardware manufacturers use the same protocol.
+
+Create independent adapters, device discovery, connection monitoring, error handling and integration testing.
+
+Hardware integration must be extensible without modifying the core transaction engine.
+
+### A5. Transaction Manager Server Integrations
+
+Create integration interfaces for:
+
+- Third-party POS platforms.
+- Loyalty and rewards programmes.
+- Third-party payment gateways.
+- Electronic lockers.
+- Reservations systems.
+- Lodging and hospitality management systems.
+
+Use REST APIs, webhooks, message queues or vendor-specific SDKs as appropriate.
+
+Provide configuration-driven integration settings.
+
+### A6. Transactional Data and Software Updates
+
+The reference architecture specifies XML-based transactional data.
+
+Preserve XML support for transactional records and exchange formats.
+
+Implement:
+
+- Local transaction logging.
+- XML serialization and deserialization.
+- Schema validation.
+- Secure cloud synchronization.
+- Transaction reconciliation.
+- Failed synchronization recovery.
+- Configuration distribution.
+- Software update distribution.
+- Update verification.
+- Version tracking.
+- Rollback mechanisms.
+
+JSON may additionally be used for APIs and internal service communication.
+
+Do not silently discard failed transactions.
+
+---
+
+# 3. AZURE NON-PCI CLOUD ARCHITECTURE
+
+Develop the cloud environment as a collection of independent, secure and maintainable services.
+
+The cloud architecture must separate non-payment business information from sensitive payment processing.
+
+## B1. mynextep.net Services – RetailEase Customer Portal
+
+Develop the equivalent RetailEase customer portal.
+
+The portal must provide:
+
+- Customer registration and authentication.
+- Organization management.
+- Store/location management.
+- Device management.
+- Transaction monitoring.
+- Operational dashboards.
+- Configuration management.
+- Software version monitoring.
+- Reporting access.
+- License information.
+- Support and account management.
+
+Implement role-based access control.
+
+Suggested roles:
+
+- Platform Super Administrator.
+- Organization Administrator.
+- Store Administrator.
+- Store Manager.
+- Supervisor.
+- Cashier.
+- Reporting Officer.
+- Technical Support.
+
+Permissions must be enforced on the server, not merely hidden in the user interface.
+
+## B2. RetailEase Scheduler
+
+Develop a centralized scheduling service.
+
+Responsibilities:
+
+1. Schedule data synchronization.
+2. Distribute configuration metadata.
+3. Schedule software updates.
+4. Maintain scheduled operational jobs.
+5. Monitor task execution.
+6. Retry failed jobs.
+7. Maintain execution history.
+8. Notify administrators about critical failures.
+
+Use reliable background processing with persistent job status.
+
+## B3. Licensing Services
+
+Create a dedicated licensing subsystem.
+
+The License Database must maintain:
+
+- Customer licensing records.
+- Subscription plans.
+- Authorized stores.
+- Authorized devices.
+- Device registration.
+- Software versions.
+- License activation.
+- License expiry.
+- Renewal history.
+- License restrictions.
+- Activation and revocation history.
+
+The licensing service must determine which software versions and devices are authorized.
+
+Implement signed license credentials, server-side validation, controlled offline grace periods and secure device registration.
+
+Never rely exclusively on client-side licensing checks.
+
+## B4. Customer Databases
+
+Follow the reference architecture's dedicated customer database approach.
+
+Each customer must have an isolated database or an explicitly approved equivalent isolation boundary.
+
+Each customer database should contain:
+
+**Transactional Information**
+- Orders.
+- Order items.
+- Transaction references.
+- Discounts.
+- Taxes.
+- Refund records.
+- Store operations.
+- Inventory movements.
+- Customer-related non-payment information.
+
+**Configuration Information**
+- Products.
+- Categories.
+- Pricing.
+- Menus.
+- Promotions.
+- Store settings.
+- Device settings.
+- System configuration.
+- Printing rules.
+- Theme metadata.
+
+Maintain customer-specific configuration files and metadata.
+
+Preserve support for system.xml and print-rules.xml as configuration formats where required.
+
+Implement database provisioning, migration, backup, recovery and isolation testing.
+
+## B5. SQL Reporting Services
+
+Implement a comprehensive reporting subsystem.
+
+Support SQL-based reporting and RDL report definitions.
+
+Reports should include:
+
+- Daily sales.
+- Weekly sales.
+- Monthly sales.
+- Product performance.
+- Store performance.
+- Transaction summaries.
+- Order status.
+- Inventory movements.
+- Discounts.
+- Refunds.
+- Tax summaries.
+- Device activity.
+- Synchronization status.
+- Operational exceptions.
+
+Provide filtering by customer, organization, location, terminal and reporting period.
+
+Reports must be accessible through the RetailEase customer portal.
+
+Do not expose one customer's reporting data to another customer.
+
+## B6. Software and Media Management
+
+Develop a centralized software and media repository.
+
+It must manage:
+
+- Software packages.
+- Application versions.
+- Release channels.
+- Patches.
+- Configuration files.
+- Branding assets.
+- Themes.
+- Product images.
+- Promotional media.
+- Digital menu assets.
+
+Implement version-controlled software distribution.
+
+Every software package must have:
+
+- Version identifier.
+- Release information.
+- Compatibility requirements.
+- Cryptographic checksum.
+- Digital signature.
+- Deployment status.
+- Rollback information.
+
+The Transaction Manager must retrieve authorized updates and distribute them to appropriate client devices.
+
+---
+
+# 4. PAYMENT SECURITY ARCHITECTURE
+
+Treat the Azure Non-PCI environment as a strictly separated environment.
+
+Do not store raw card numbers, CVV values, PINs or other prohibited sensitive authentication data in the non-PCI databases.
+
+Payment operations must be handled through properly scoped, certified payment providers and terminals.
+
+RetailEase should store only the necessary payment references, transaction status, approved amounts and permitted reconciliation metadata.
+
+Payment integration must undergo an independent PCI DSS scope and compliance assessment.
+
+Never claim PCI compliance merely because payment data is excluded from a particular database.
+
+---
+
+# 5. DATABASE AND DATA ENGINEERING
+
+Use SQL Server as the primary cloud database technology.
+
+Use an appropriate local database for in-store operations.
+
+Implement:
+
+- Referential integrity.
+- Database migrations.
+- Transaction boundaries.
+- Optimized indexes.
+- Auditable data changes.
+- Data retention policies.
+- Backup and recovery.
+- Tenant isolation.
+- Encryption.
+- Synchronization tracking.
+
+Design a complete entity relationship model before implementing major database modules.
+
+Every transaction must have a traceable lifecycle.
+
+Define synchronization conflict policies explicitly.
+
+Use UTC timestamps internally and appropriate local-time presentation for each store.
+
+---
+
+# 6. SECURITY AND RELIABILITY
+
+Apply enterprise software security practices.
+
+Implement:
+
+- Secure authentication.
+- Multi-factor authentication for privileged accounts.
+- Role-based access control.
+- API authorization.
+- Encryption in transit.
+- Encryption at rest.
+- Secure secrets management.
+- Audit logging.
+- Rate limiting.
+- Input validation.
+- SQL injection protection.
+- CSRF protection where applicable.
+- Secure session management.
+- Device authentication.
+- Software package signature verification.
+- Dependency vulnerability scanning.
+
+Design for unreliable connectivity and interrupted power.
+
+Protect queued transactions against corruption and accidental deletion.
+
+Use structured logs, health checks, monitoring and actionable diagnostics.
+
+---
+
+# 7. C# SOFTWARE ENGINEERING STANDARDS
+
+Use modern, maintainable C#.
+
+Follow:
+
+- SOLID principles.
+- Clean separation of responsibilities.
+- Dependency injection.
+- Asynchronous programming.
+- Strong typing.
+- Interface-based hardware integration.
+- Structured exception handling.
+- Configuration-driven services.
+- Automated database migrations.
+- XML and JSON serialization standards.
+- Secure API design.
+
+Use EF Core where appropriate and raw SQL or optimized queries where justified.
+
+Avoid unnecessary architectural complexity.
+
+The Transaction Manager, Client Manager, cloud services and reporting components must be independently testable.
+
+Use modular architecture with clearly defined boundaries.
+
+---
+
+# 8. USER EXPERIENCE AND INTERFACE DESIGN
+
+Design RetailEase with a professional enterprise retail appearance.
+
+The interface must be:
+
+- Modern.
+- Responsive.
+- Accessible.
+- Consistent.
+- Fast.
+- Easy to learn.
+- Suitable for touchscreens.
+- Adaptable to different screen sizes.
+
+Provide different interfaces for:
+
+1. Cloud administrators.
+2. Store managers.
+3. POS cashiers.
+4. Kiosk customers.
+5. Order management personnel.
+6. Reporting users.
+
+Do not use one generic dashboard for every role.
+
+Provide clear transaction status, error notifications, connectivity indicators and operational alerts.
+
+---
+
+# 9. IMPLEMENTATION ROADMAP
+
+Develop RetailEase through controlled engineering phases.
+
+### Phase 0 – Architecture and Requirements Validation
+- Study the reference architecture.
+- Identify missing specifications.
+- Produce system requirements.
+- Create architecture decision records.
+- Establish security boundaries.
+- Define database tenancy.
+- Define transaction and synchronization protocols.
+- Produce implementation backlog.
+
+### Phase 1 – Engineering Foundation
+- Create the C# solution.
+- Establish project structure.
+- Configure .NET.
+- Set up database infrastructure.
+- Implement logging.
+- Implement authentication foundations.
+- Establish automated testing.
+- Configure CI/CD.
+
+### Phase 2 – In-Store Transaction Engine
+- Transaction Manager.
+- Local transaction database.
+- Transaction processing.
+- Transaction logging.
+- Offline operation.
+- Synchronization engine.
+- Reconciliation.
+
+### Phase 3 – Client Management and Interfaces
+- Client Manager.
+- POS interface.
+- Kiosk interface.
+- DMD interface.
+- OMS interface.
+- Device registration.
+- Client configuration.
+
+### Phase 4 – Peripheral and External Integrations
+- Hardware adapter framework.
+- Printers.
+- Scanners.
+- Scales.
+- Payment terminals.
+- Third-party POS.
+- Loyalty systems.
+- Reservations and lockers.
+
+### Phase 5 – Cloud Platform
+- Customer portal.
+- Customer databases.
+- Licensing service.
+- Scheduler.
+- Configuration distribution.
+- Software and media management.
+
+### Phase 6 – Reporting and Analytics
+- SQL reporting.
+- RDL integration.
+- Business dashboards.
+- Operational reports.
+- Customer-specific reporting.
+
+### Phase 7 – Enterprise Security and Resilience
+- Security testing.
+- Offline recovery.
+- Synchronization conflict testing.
+- Backup and disaster recovery.
+- Performance testing.
+- Load testing.
+- Penetration testing.
+
+### Phase 8 – Production Release
+- Installation packages.
+- Database migration packages.
+- Cloud deployment.
+- Store deployment.
+- Device registration.
+- Software update distribution.
+- Documentation.
+- Administrator training.
+- Production acceptance testing.
+
+---
+
+# 10. REQUIRED PROJECT STRUCTURE
+
+Use a maintainable solution structure similar to the following.
+
+RetailEase/
+│
+├── RetailEase.sln
+│
+├── src/
+│   ├── RetailEase.Domain/
+│   ├── RetailEase.Application/
+│   ├── RetailEase.Infrastructure/
+│   ├── RetailEase.Contracts/
+│   │
+│   ├── RetailEase.TransactionManager/
+│   ├── RetailEase.ClientManager/
+│   ├── RetailEase.PeripheralIntegration/
+│   ├── RetailEase.Synchronization/
+│   │
+│   ├── RetailEase.Api/
+│   ├── RetailEase.CloudServices/
+│   ├── RetailEase.Licensing/
+│   ├── RetailEase.Scheduler/
+│   ├── RetailEase.Reporting/
+│   ├── RetailEase.CustomerPortal/
+│   │
+│   ├── RetailEase.POS/
+│   ├── RetailEase.Kiosk/
+│   ├── RetailEase.DMD/
+│   └── RetailEase.OMS/
+│
+├── tests/
+│   ├── RetailEase.UnitTests/
+│   ├── RetailEase.IntegrationTests/
+│   ├── RetailEase.SecurityTests/
+│   ├── RetailEase.PerformanceTests/
+│   └── RetailEase.EndToEndTests/
+│
+├── database/
+├── deployment/
+├── docs/
+├── scripts/
+├── installers/
+└── README.md
+
+Adjust project boundaries where justified by the architecture, but maintain separation between in-store and cloud components.
+
+---
+
+# 11. TESTING AND ACCEPTANCE CRITERIA
+
+Do not declare a module complete merely because it compiles.
+
+Each module must pass its relevant automated tests.
+
+Mandatory acceptance conditions:
+
+1. A store can process supported transactions locally.
+2. Transactions survive temporary internet disconnection.
+3. Transactions synchronize after reconnection.
+4. Duplicate transaction submissions do not create duplicate records.
+5. Multiple client devices can communicate with the Transaction Manager.
+6. Each Client Manager can identify and launch its assigned UI.
+7. Unauthorized devices cannot access licensed services.
+8. Configuration updates reach authorized devices.
+9. Software updates are verified before installation.
+10. Customer databases remain isolated.
+11. Portal users cannot access unauthorized stores.
+12. Reports reflect reconciled transactional information.
+13. Peripheral failures do not corrupt transaction records.
+14. Failed background jobs can be diagnosed and retried.
+15. Backups can be restored and verified.
+16. Sensitive payment authentication data is not stored in the non-PCI environment.
+17. The system maintains auditable records of critical operations.
+
+Provide evidence for every acceptance criterion.
+
+---
+
+# 12. ENGINEERING DELIVERABLES
+
+Produce the following:
+
+1. Complete technical architecture.
+2. Architecture decision records.
+3. Software requirements specification.
+4. Database ERD.
+5. Database schemas and migrations.
+6. C# source code.
+7. API documentation.
+8. XML transaction specifications.
+9. Synchronization protocol documentation.
+10. Peripheral integration specifications.
+11. Security architecture.
+12. Automated test suites.
+13. Deployment scripts.
+14. Installation packages.
+15. Administrator documentation.
+16. User manuals.
+17. Production deployment guide.
+18. Release notes.
+
+Maintain a development progress report identifying:
+
+- Completed modules.
+- Modules in progress.
+- Pending modules.
+- Dependencies.
+- Outstanding defects.
+- Test results.
+- Security findings.
+- Release blockers.
+
+Never mark unfinished work as completed.
+
+---
+
+# 13. STRICT DEVELOPMENT INSTRUCTIONS
+
+1. Do not develop the entire platform as a single monolithic source file.
+2. Do not replace C# with PHP, Python or JavaScript for the core business logic.
+3. Do not use mock data as evidence of production functionality.
+4. Do not hardcode customer licensing.
+5. Do not bypass tenant isolation.
+6. Do not treat an online-only transaction system as acceptable.
+7. Do not create fake peripheral integrations.
+8. Do not store prohibited payment information in the Non-PCI environment.
+9. Do not silently ignore errors.
+10. Do not introduce undocumented architectural changes.
+11. Do not sacrifice data integrity for convenience.
+12. Do not claim production readiness without test evidence.
+
+Where specifications are incomplete, create an engineering decision record, state the assumptions, identify the risks and obtain approval for consequential decisions.
+
+Work incrementally, with a working and testable deliverable at the end of each development phase.
+
+---
+
+# 14. FINAL PRODUCT OBJECTIVE
+
+The final objective is to deliver RetailEase as a comprehensive enterprise retail platform capable of coordinating physical store operations, transaction processing, customer-facing interfaces, hardware peripherals, cloud services, customer databases, software licensing, centralized configuration, synchronization and business reporting.
+
+The architecture must allow multiple stores, multiple customers, multiple terminals and multiple deployment environments.
+
+The platform must be extensible, secure, reliable and maintainable.
+
+**Build RetailEase as a real enterprise software product, not a classroom exercise, prototype or superficial demonstration.**
+
+Begin with Phase 0, validate the architecture, produce the technical specifications and development backlog, then proceed through the implementation phases with documented approvals and test evidence.
+
+**Primary reference: NEXTEP ARCHITECTURE DESIGN BREAKDOWN.**
+**Target implementation: RetailEase – C# / .NET Enterprise Retail Platform.**
