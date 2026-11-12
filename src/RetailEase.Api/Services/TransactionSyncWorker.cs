@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RetailEase.Application.Synchronization;
@@ -11,13 +12,13 @@ namespace RetailEase.Api.Services;
 /// </summary>
 public class TransactionSyncWorker : BackgroundService
 {
-    private readonly ISynchronizationEngine _synchronizationEngine;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<TransactionSyncWorker> _logger;
     private static readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(30);
 
-    public TransactionSyncWorker(ISynchronizationEngine synchronizationEngine, ILogger<TransactionSyncWorker> logger)
+    public TransactionSyncWorker(IServiceScopeFactory scopeFactory, ILogger<TransactionSyncWorker> logger)
     {
-        _synchronizationEngine = synchronizationEngine;
+        _scopeFactory = scopeFactory;
         _logger = logger;
     }
 
@@ -27,16 +28,20 @@ public class TransactionSyncWorker : BackgroundService
         {
             try
             {
+                using var scope = _scopeFactory.CreateScope();
+                var synchronizationEngine = scope.ServiceProvider.GetRequiredService<ISynchronizationEngine>();
+
                 var request = new SynchronizationRequest(StoreId: Guid.Empty, TerminalId: Guid.Empty);
-                var result = await _synchronizationEngine.SynchronizeAsync(request, stoppingToken);
+                var result = await synchronizationEngine.SynchronizeAsync(request, stoppingToken);
 
                 if (result.ProcessedCount > 0)
                 {
                     _logger.LogInformation(
-                        "Transaction synchronization pass completed. Processed={Processed}, Succeeded={Succeeded}, Failed={Failed}.",
+                        "Transaction synchronization pass completed. Processed={Processed}, Succeeded={Succeeded}, Failed={Failed}, Conflicts={Conflicts}.",
                         result.ProcessedCount,
                         result.SucceededCount,
-                        result.FailedCount);
+                        result.FailedCount,
+                        result.ConflictsCount);
                 }
             }
             catch (OperationCanceledException)

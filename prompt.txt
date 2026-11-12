@@ -216,7 +216,7 @@ Develop the cloud environment as a collection of independent, secure and maintai
 
 The cloud architecture must separate non-payment business information from sensitive payment processing.
 
-## B1. mynextep.net Services – RetailEase Customer Portal
+## B1. retailease.net Services – RetailEase Customer Portal
 
 Develop the equivalent RetailEase customer portal.
 

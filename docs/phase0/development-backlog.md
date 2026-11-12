@@ -34,17 +34,19 @@
 - TM-001: Transaction aggregate and lifecycle states. **Delivered.**
 - TM-002: Local transaction persistence (SQLite/local DB). **Delivered** (SQLite via EF Core Sqlite;
   in-memory store for unit tests).
-- TM-003: Offline queue and retry. In progress (retry orchestration delivered; queue worker pending).
+- TM-003: Offline queue and retry. In progress (retry orchestration + background sync worker delivered;
+  queue worker hardening pending).
 - TM-004: Idempotent synchronization. In progress (idempotency enforcement + outbox sync engine delivered;
   certified cloud client pending).
-- TM-005: Reconciliation and conflict handling. Pending.
+- TM-005: Reconciliation and conflict handling. **Delivered** (conflict lifecycle state, `MarkConflict`,
+  conflict-aware sync handling, conflicts query for manual reconciliation).
 
-## Phase 3 — Client Management and Interfaces
+## Phase 3 – Client Management and Interfaces
 
-- CLM-001: Client Manager host.
-- CLM-002: POS / Kiosk / DMD / OMS UIs.
+- CLM-001: Client Manager host. **Delivered** (client device registration + heartbeat health reporting slice).
+- CLM-002: POS / Kiosk / DMD / OMS UIs. Pending.
 
-## Phase 4 — Peripheral and External Integrations
+## Phase 4 – Peripheral and External Integrations
 
 - PER-001: Peripheral adapter framework.
 - PER-002: Payment gateway integration.

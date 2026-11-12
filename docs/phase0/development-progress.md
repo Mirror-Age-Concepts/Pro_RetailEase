@@ -1,7 +1,7 @@
-# RetailEase Development Progress Report — Phase 0 / Phase 1 / Phase 2
+# RetailEase Development Progress Report — Phase 0 / Phase 1 / Phase 2 / Phase 3
 
 - **Report date:** 2026-11-12
-- **Overall status:** Phase 0 artifacts produced; Phase 1 foundation green; Phase 2 transaction engine slice delivered
+- **Overall status:** Phase 0 artifacts produced; Phase 1 foundation green; Phase 2 transaction engine delivered (lifecycle, SQLite persistence, sync engine, retry, conflict handling); Phase 3 Client Manager slice delivered.
 
 ## Completed Modules
 
@@ -22,15 +22,23 @@
   - Application: `ITransactionStore`, `ITransactionManager`, `TransactionManager`, create request.
   - Infrastructure: `InMemoryTransactionStore`, `SqliteTransactionStore`, `InMemoryCloudTransactionClient`.
   - Synchronization: `ISynchronizationEngine`, `TransactionSynchronizer`, `ICloudTransactionClient`, `SyncResult`,
-    retry orchestration (`RetryFailedAsync`).
-  - Unit tests: transaction lifecycle, manager orchestration, synchronization, retry (19 unit tests green).
+    retry orchestration (`RetryFailedAsync`) and conflict handling (`Conflict` status + `MarkConflict`).
+  - API: registered SQLite-backed transaction store/manager, sync engine, and background sync worker
+    (scoped engine with scope-per-iteration resolution in worker; local SQLite schema ensured at startup).
+  - Unit tests: transaction lifecycle, manager orchestration, synchronization, retry, conflict (27 unit tests green).
+- Phase 3 — Client Management and Interfaces (delivered slices):
+  - Domain: `ClientDevice`, `ClientDeviceType`, `ClientDeviceStatus`.
+  - Application: `IClientStore`, `IClientManager`, `ClientManager`, `RegisterClientRequest`.
+  - Infrastructure: `InMemoryClientStore`.
+  - Unit tests: client registration and heartbeat (4 client manager tests green).
 
 ## Modules In Progress
 
 - Phase 0 requirements validation and open-question resolution.
 - Phase 1 authentication foundations completion; structured/file logging sinks.
-- Phase 2: Offline retry orchestration delivered; certified cloud sync client completion (TM-004);
-  reconciliation and conflict handling (TM-005).
+- Phase 2: Offline retry orchestration and conflict handling delivered; background sync worker added and
+  runtime-verified; certified cloud sync client completion (TM-004) pending; reconciliation workflow
+  completion (TM-005) delivered.
 
 ## Pending Modules
 
@@ -47,14 +55,17 @@
 
 ## Outstanding Defects
 
-- None open at scaffold/slice level; environment-specific defects to be tracked post Phase 2.
+- None open at scaffold/slice level; environment-specific defects to be tracked post Phase 2. (Runtime
+  discovery: singleton synchronizer → scoped store DI lifetime mismatch and missing SQLite schema were found
+  and fixed during Phase 2 verification.)
 
 ## Test Results
 
 - `dotnet build RetailEase.sln -c Debug` → success, 0 warnings, 0 errors.
-- `dotnet test RetailEase.sln -c Debug` → passed (unit + integration; 13 + 2 tests green).
+- `dotnet test RetailEase.sln -c Debug` → passed (unit + integration; 27 + 2 tests green).
 - Runtime: `GET /health` on locally running API → HTTP 200, body `Healthy`.
-- Phase 2 slice: lifecycle transitions, manager orchestration, idempotency store rejection — covered by unit tests.
+- Phase 2 delivered slices: lifecycle transitions, manager orchestration, idempotency store rejection,
+  SQLite-backed persistence, outbox sync engine, retry orchestration, and conflict handling — covered by unit tests.
 
 ## Security Findings
 
